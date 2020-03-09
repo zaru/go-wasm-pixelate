@@ -22,7 +22,27 @@ func colorAvg(data []int) int {
 }
 
 func pixelate(cc clusters.Clusters, colorIndexes map[string][]int, ctx js.Value) {
+	// 遊び ビビットな色に強制変換するテスト
+	//colors := []string{"#00a4ef", "#fd4084", "#6ab43e"}
+	//clusters := make([]string, len(cc))
+	//for i, c := range cc {
+	//	c2 := colorful.Lab(c.Center[0]/100, c.Center[1]/100, c.Center[2]/100)
+	//	clusters[i] = c2.Hex()
+	//}
+	//sort.Strings(clusters)
+
 	for _, c := range cc {
+		c2 := colorful.Lab(c.Center[0]/100, c.Center[1]/100, c.Center[2]/100)
+		//h, s, l := c2.Hcl()
+		//c3 := colorful.Hcl(h * 1, s * 1.5, l * 1)
+		hex := c2.Hex()
+		ctx.Set("fillStyle", hex)
+
+		//for i, cc := range clusters {
+		//	if cc == hex {
+		//		ctx.Set("fillStyle", colors[i])
+		//	}
+		//}
 		for _, org := range c.Observations {
 
 			key := fmt.Sprintf("%.4f%.4f%.4f", org.Coordinates()[0], org.Coordinates()[1], org.Coordinates()[2])
@@ -31,8 +51,6 @@ func pixelate(cc clusters.Clusters, colorIndexes map[string][]int, ctx js.Value)
 					x := index / (width / grid) * grid
 					y := index % (height / grid) * grid
 
-					c2 := colorful.Lab(c.Center[0]/100, c.Center[1]/100, c.Center[2]/100)
-					ctx.Set("fillStyle", c2.Hex())
 					ctx.Call("fillRect", x, y, grid, grid)
 				}
 				delete(colorIndexes, key)
@@ -55,7 +73,7 @@ func main() {
 	canvas := js.Global().Get("document").Call("getElementById", "canvas")
 	ctx := canvas.Call("getContext", "2d")
 
-	canvas2 := js.Global().Get("document").Call("getElementById", "canvas-pixelate")
+	canvas2 := js.Global().Get("document").Call("getElementById", "pixelated-canvas")
 	ctx2 := canvas2.Call("getContext", "2d")
 
 	total := grid * grid
